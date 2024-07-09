@@ -9,7 +9,7 @@ javac Main.java
 ```
 
 ## Running
-Change `-Xmx5G` to the amount of memory you want to assign.
+Change `-Xmx5G` to the amount of memory you want to allocate.
 ```bash
 cd src
 java -Xmx5G Main

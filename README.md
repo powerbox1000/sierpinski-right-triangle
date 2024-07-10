@@ -1,5 +1,5 @@
 # WARNING
-This program is VERY safe to use and will NEVER consume all your RAM.
+My implementation of swap files is horrible and will proably take days to generate!
 
 # Usage
 ## Compiling class files

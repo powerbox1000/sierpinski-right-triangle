@@ -1,5 +1,8 @@
 import java.util.Scanner;
+import java.io.FileReader;
+import java.io.BufferedReader;
 import java.io.FileWriter;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 
@@ -10,8 +13,10 @@ class Swappable {
   public Swappable(int size) throws Exception {
     loadedRow = new boolean[size];
 
+    Files.createDirectories(Paths.get("swap"));
+
     for (int row = 0; row < size; row++){
-      FileWriter writer = new FileWriter("swap/swap_" + row);
+      BufferedWriter writer = new BufferedWriter(new FileWriter("swap/swap_" + row), 16384);
       for (int col = 0; col < size; col++){
         writer.write('0');
       }
@@ -32,11 +37,11 @@ class Swappable {
   }
 
   private void loadRow(int row, boolean unload) throws Exception {
+    if (currRow == row) return;
     if(unload) unloadRow();
     currRow = row;
-    File currswap = new File("swap/swap_" + row);
-    Scanner reader = new Scanner(currswap);
-    char[] data = reader.nextLine().toCharArray();
+    BufferedReader reader = new BufferedReader(new FileReader("swap/swap_" + currRow), 16384);
+    char[] data = reader.readLine().toCharArray();
     reader.close();
     for (int i = 0; i < data.length; i++){
       loadedRow[i] = (data[i] == '1');
@@ -44,7 +49,7 @@ class Swappable {
   }
 
   private void unloadRow() throws Exception {
-    FileWriter writer = new FileWriter("swap/swap_" + currRow);
+    BufferedWriter writer = new BufferedWriter(new FileWriter("swap/swap_" + currRow), 16384);
     for (int col = 0; col < loadedRow.length; col++){
       writer.write(loadedRow[col] ? '1' : '0');
     }
@@ -94,7 +99,7 @@ public class Main {
       shape.set(0, 0, true);
     }
     
-    FileWriter ihatethis = new FileWriter("triangle.txt");
+    BufferedWriter ihatethis = new BufferedWriter(new FileWriter("triangle.txt"), 64000);
 
     for (int row = 0; row < shape.length(); row++) {
       final int len = (row + 1);

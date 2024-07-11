@@ -1,19 +1,19 @@
 import java.util.Scanner;
 import java.io.*;
 import java.nio.file.*;
-import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 class Swappable {
-  private boolean[] loadedRow;
+  private char[] loadedRow;
   private int currRow = 0;
 
   public Swappable(int size) throws Exception {
-    loadedRow = new boolean[size];
+    loadedRow = new char[size];
 
     Files.createDirectories(Paths.get("swap"));
 
     for (int row = 0; row < size; row++){
-      BufferedWriter writer = new BufferedWriter(new FileWriter("swap/swap_" + row), 16384);
+      BufferedWriter writer = new BufferedWriter(Files.newBufferedWriter(Paths.get("swap/swap_" + row), StandardCharsets.UTF_8), 1000000);
       for (int col = 0; col < size; col++){
         writer.write('0');
       }
@@ -37,18 +37,15 @@ class Swappable {
     if (currRow == row) return;
     if(unload) unloadRow();
     currRow = row;
-    BufferedReader reader = new BufferedReader(new FileReader("swap/swap_" + currRow), 16384);
-    char[] data = reader.readLine().toCharArray();
+    BufferedReader reader = new BufferedReader(new FileReader("swap/swap_" + currRow), 1000000);
+    loadedRow = reader.readLine().toCharArray();
     reader.close();
-    for (int i = 0; i < data.length; i++){
-      loadedRow[i] = (data[i] == '1');
-    }
   }
 
   private void unloadRow() throws Exception {
-    BufferedWriter writer = new BufferedWriter(new FileWriter("swap/swap_" + currRow), 16384);
+    BufferedWriter writer = new BufferedWriter(new FileWriter("swap/swap_" + currRow), 1000000);
     for (int col = 0; col < loadedRow.length; col++){
-      writer.write(loadedRow[col] ? '1' : '0');
+      writer.write(loadedRow[col]);
     }
     writer.close();
   }
@@ -56,13 +53,13 @@ class Swappable {
   public boolean get(int row, int col) throws Exception {
     if (row != currRow) loadRow(row);
 
-    return loadedRow[col];
+    return loadedRow[col] == '1';
   }
 
   public void set(int row, int col, boolean val) throws Exception {
     if (row != currRow) loadRow(row);
 
-    loadedRow[col] = val;
+    loadedRow[col] = (val ? '1' : '0');
   }
 
   public void cleanSwap() throws Exception {
@@ -79,8 +76,8 @@ public class Main {
     Scanner scanner = new Scanner(System.in);
     System.out.print("Enter recurse amount: ");
     final int recurse = scanner.nextInt();
-    final int numShapes = (int) Math.pow(3, recurse-1);
-    scanner.close();
+    scanner.nextLine();
+
     if (recurse <= 0) {
       System.err.println("Recurse cannot be less than 1");
       System.exit(1);
@@ -88,9 +85,23 @@ public class Main {
 
     final int rows = (int) Math.pow(2, recurse - 1);
 
+    final float storageEstimate = (float) (Math.pow(2, recurse - 11) * rows) / 1000000;
+    boolean cont = true;
+
+    if (storageEstimate >= 1){
+      System.out.print("This operation will take " + storageEstimate + "GB of disk space while the program runs. Continue? (y/n) ");
+      final String n = scanner.nextLine().toLowerCase();
+      cont = (n == "y");
+      System.out.print('\n');
+    }
+
+    scanner.close();
+
+    if (!cont) return;
+
     final Swappable shape;
     if (recurse > 1){
-      shape = buildShape(new Swappable(rows), recurse, numShapes, new int[0]);
+      shape = buildShape(new Swappable(rows), recurse, new int[0]);
     } else {
       shape = new Swappable(1);
       shape.set(0, 0, true);
@@ -130,7 +141,6 @@ public class Main {
   public static Swappable buildShape(
     Swappable shape,
     int recurse,
-    int numShapes,
     int[] boxids
   ) throws Exception {
     if (recurse > 1){
@@ -139,7 +149,7 @@ public class Main {
         int[] nboxids = new int[boxids.length + 1];
         System.arraycopy(boxids, 0, nboxids, 0, boxids.length);
         nboxids[boxids.length] = i;
-        shape = buildShape(shape, recurse - 1, numShapes, nboxids);
+        shape = buildShape(shape, recurse - 1, nboxids);
       }
     } else {
       // draw

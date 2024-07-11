@@ -18,6 +18,7 @@ class Swappable {
         writer.write('0');
       }
       writer.close();
+      System.out.println("Generated swap file " + (row + 1) + " out of " + size);
     }
 
     loadRow(0, false);

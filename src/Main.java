@@ -13,10 +13,12 @@ class Swappable {
     Files.createDirectories(Paths.get("swap"));
 
     for (int row = 0; row < size; row++){
-      BufferedWriter writer = new BufferedWriter(Files.newBufferedWriter(Paths.get("swap/swap_" + row), StandardCharsets.UTF_8), 1000000);
+      char[] tmp = new char[size];
       for (int col = 0; col < size; col++){
-        writer.write('0');
+        tmp[col] = '0';
       }
+      BufferedWriter writer = new BufferedWriter(Files.newBufferedWriter(Paths.get("swap/swap_" + row), StandardCharsets.UTF_8), 1000000);
+      writer.write(LZString.compressToBase64(String.valueOf(tmp)));
       writer.close();
     }
 
@@ -38,15 +40,13 @@ class Swappable {
     if(unload) unloadRow();
     currRow = row;
     BufferedReader reader = new BufferedReader(new FileReader("swap/swap_" + currRow), 1000000);
-    loadedRow = reader.readLine().toCharArray();
+    loadedRow = (LZString.decompressFromBase64(reader.readLine())).toCharArray();
     reader.close();
   }
 
   private void unloadRow() throws Exception {
     BufferedWriter writer = new BufferedWriter(new FileWriter("swap/swap_" + currRow), 1000000);
-    for (int col = 0; col < loadedRow.length; col++){
-      writer.write(loadedRow[col]);
-    }
+    writer.write(LZString.compressToBase64(String.valueOf(loadedRow)));
     writer.close();
   }
 
@@ -89,9 +89,9 @@ public class Main {
     boolean cont = true;
 
     if (storageEstimate >= 1){
-      System.out.print("This operation will take " + storageEstimate + "GB of disk space while the program runs. Continue? (y/n) ");
+      System.out.print("This operation will take " + storageEstimate + "GB of disk space while the program runs (uncompressed; compression ratio unknown). Continue? (y/n) ");
       final String n = scanner.nextLine().toLowerCase();
-      cont = (n == "y");
+      cont = (n.equals("y"));
       System.out.print('\n');
     }
 

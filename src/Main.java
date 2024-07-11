@@ -91,7 +91,7 @@ public class Main {
     if (storageEstimate >= 1){
       System.out.print("This operation will take " + storageEstimate + "GB of disk space while the program runs. Continue? (y/n) ");
       final String n = scanner.nextLine().toLowerCase();
-      cont = (n == "y");
+      cont = (n.equals("y"));
       System.out.print('\n');
     }
 

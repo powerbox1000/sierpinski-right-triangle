@@ -96,6 +96,8 @@ public class Main {
       final int x = Integer.parseInt(firstBit, 2);
       final int y = Integer.parseInt(secondBit, 2);
 
+      System.out.println("Drawing (" + x + ", " + y + ")");
+
       shape[y][x] = true;
     }
     
